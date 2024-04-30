@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>用户注册</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    table {
+      background-color: rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(10px);
+    }
+
+    .error-message {
+      font-size: 12px;
+      color: red;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <table border="1" width="800" height="500" bgcolor="#FF6699">
+    <tr>
+      <td bgcolor="#F3F3FA">
+        <h2 align="center">&nbsp;&nbsp;&nbsp;&nbsp;用户注册</h2><br>
+        <form id="register-form" align="center">
+          用户名：<input type="text" id="Uname" name="Uname" placeholder="请输入用户名！" style="width: 400px;height: 30px;"><br><br>
+          电话号码：<input type="text" id="Utel" name="Utel" placeholder="请输入11位电话号码！" style="width: 400px;height: 30px;"><br>
+          <span id="tel-error" class="error-message"></span><br>
+          地址：<input type="text" id="Uadd" name="Uadd" placeholder="请输入地址！" style="width: 400px;height: 30px;"><br><br>
+          初始化密码：<input type="password" id="password" name="password" placeholder="请初始化密码！" style="width: 400px;height: 30px;"><br><br>
+          确认密码：<input type="password" id="Upin" name="Upin" placeholder="请再次输入密码！" style="width: 400px;height: 30px;"><br><br>
+          <input type="submit" value="注册" style="width: 200px;height: 40px;">
+          <input type="reset" value="重置" style="width: 200px;height: 40px;">
+        </form>
+      </td>
+    </tr>
+  </table>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $(document).ready(function () {
+      $('#register-form').submit(function (event) {
+        event.preventDefault(); // 阻止表单默认提交行为
+
+        // 获取输入的用户名、电话号码、地址和密码
+        var Uname = $('#Uname').val();
+        var Utel = $('#Utel').val();
+        var Uadd = $('#Uadd').val();
+        var password = $('#password').val();
+        var Upin = $('#Upin').val();
+
+        // 检查是否填写了所有必填字段
+        //如果没有填写所有必填字段，弹出提示框
+        if (Uname === '' || Utel === '' || Uadd === '' || password === '' || Upin === '') {
+          alert('请填写所有必填字段！');
+          return;
+        }
+
+        // 检查电话号码是否为11位数字
+        // 如果不是11位数字，弹出提示框
+        var telPattern = /^\d{11}$/;
+        if (!telPattern.test(Utel)) {
+          $('#tel-error').text('请输入11位电话号码');
+          return;
+        } else {
+          $('#tel-error').text('');
+        }
+
+        // 检查初始化密码和确认密码是否一致
+        if (password !== Upin) {
+          alert('密码不一致，请重新输入！');
+          return;
+        }
+
+        // 发送POST请求给后端
+        // 发送 POST 请求给后端
+        $.ajax({
+          url: '/register',
+          contentType: 'application/json',
+          method: 'POST',
+          data: JSON.stringify({
+            Uname: Uname,
+            Utel: Utel,
+            Uadd: Uadd,
+            Upin: Upin
+          }),
+          dataType: 'json',
+          success: function (data) {
+            if (data.success) {
+              alert('注册成功！');
+              window.location.href = '/login.html'; // 注册成功后跳转到登录页面
+            } else {
+              alert('用户名已存在，请更改后重试！');
+            }
+          },
+          error: function () {
+            alert('请求失败，请重试！');
+          }
+        });
+
+      });
+    });
+  </script>
+</body>
+
+</html>
+

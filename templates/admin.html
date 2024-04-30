@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>电商后台管理系统</title>
+    <style>
+        .form-container {
+            display: none;
+        }
+
+        .form-container.active {
+            display: block;
+        }
+
+                
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            background-color: #89867e;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .btn.large {
+            padding: 20px 40px;
+            font-size: 22px;
+        }
+
+        .product-image {
+            width: 100px;
+            height: 100px;
+            margin-right: 10px;
+        }
+
+        .counter {
+            display: flex;
+            align-items: center;
+        }
+
+        .total {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .buy-button {
+            margin-top: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        /* Border styles */
+        #product-list thead,
+        #product-list tr {
+            border-top: 1px solid rgb(211, 202, 221);
+        }
+
+        #product-list {
+            border-bottom: 1px solid rgb(211, 202, 221);
+        }
+
+        /* Padding and font style */
+        #product-list td,
+        #product-list th {
+            padding: 5px 10px;
+            font-size: 12px;
+            font-family: Verdana;
+            color: rgb(95, 74, 121);
+        }
+
+        /* Alternating background colors */
+        #product-list tr:nth-child(even) {
+            background: rgb(223, 216, 232);
+        }
+
+        #product-list tr:nth-child(odd) {
+            background: #fff;
+        }
+
+        .product-quantity {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .product-quantity input[type="number"] {
+            width: 30px;
+            text-align: center;
+        }
+
+        .product-quantity button {
+            margin: 0 5px;
+        }
+
+        #shop-list table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #shop-list th,
+        #shop-list td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        /* Border styles */
+        #shop-list thead,
+        #shop-list tr {
+            border-top: 1px solid rgb(211, 202, 221);
+        }
+
+        #shop-list {
+            border-bottom: 1px solid rgb(211, 202, 221);
+        }
+
+        /* Padding and font style */
+        #shop-list td,
+        #shop-list th {
+            padding: 5px 10px;
+            font-size: 12px;
+            font-family: Verdana;
+            color: rgb(95, 74, 121);
+        }
+
+        /* Alternating background colors */
+        #shop-list tr:nth-child(even) {
+            background: rgb(223, 216, 232);
+        }
+
+        #shop-list tr:nth-child(odd) {
+            background: #fff;
+        }
+
+        #buying-list table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #buying-list th,
+        #buying-list td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        /* Border styles */
+        #buying-list thead,
+        #buying-list tr {
+            border-top: 1px solid rgb(211, 202, 221);
+        }
+
+        #buying-list {
+            border-bottom: 1px solid rgb(211, 202, 221);
+        }
+
+        /* Padding and font style */
+        #buying-list td,
+        #buying-list th {
+            padding: 5px 10px;
+            font-size: 12px;
+            font-family: Verdana;
+            color: rgb(95, 74, 121);
+        }
+
+        /* Alternating background colors */
+        #buying-list tr:nth-child(even) {
+            background: rgb(223, 216, 232);
+        }
+
+        #buying-list tr:nth-child(odd) {
+            background: #fff;
+        }
+
+
+        #user-list table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #user-list th,
+        #user-list td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        /* Border styles */
+        #user-list thead,
+        #user-list tr {
+            border-top: 1px solid rgb(211, 202, 221);
+        }
+
+        #user-list {
+            border-bottom: 1px solid rgb(211, 202, 221);
+        }
+
+        /* Padding and font style */
+        #user-list td,
+        #user-list th {
+            padding: 5px 10px;
+            font-size: 12px;
+            font-family: Verdana;
+            color: rgb(95, 74, 121);
+        }
+
+        /* Alternating background colors */
+        #user-list tr:nth-child(even) {
+            background: rgb(223, 216, 232);
+        }
+
+        #user-list tr:nth-child(odd) {
+            background: #fff;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function showForm(formId) {
+            var forms = document.querySelectorAll('.form-container');
+            for (var i = 0; i < forms.length; i++) {
+                forms[i].classList.remove('active');
+            }
+
+            var selectedForm = document.getElementById(formId);
+            selectedForm.classList.add('active');
+
+            if (formId === 'product-form') {
+                var productFormContainer = document.getElementById('product-form-container');
+                productFormContainer.classList.add('active');
+                searchProducts();
+            }
+            else if (formId === 'merchant-form'){
+                var shopFormContainer = document.getElementById('merchant-form-container');
+                shopFormContainer.classList.add('active');
+                searchShops();
+            } 
+            else if (formId === 'order-form'){
+                var orderFormContainer = document.getElementById('order-form-container');
+                orderFormContainer.classList.add('active');
+                searchbuyings();
+            } 
+            else if (formId === 'user-form'){
+                var userFormContainer = document.getElementById('user-form-container');
+                userFormContainer.classList.add('active');
+                searchusers();
+            }
+        }
+
+        //删除商品的函数
+        function deleteProduct(Gno) {
+            var data={
+                Gno:Gno
+            }
+            $.ajax({
+                url: '/deleteProduct',
+                method: 'POST',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                success: function(response) {
+                    if (response.success) {
+                        searchProducts();
+                    }
+                    else {
+                        alert('删除失败！');
+                    }
+                }
+            });
+        }
+
+        //删除商家的函数
+        function deleteShop(Sno) {
+            var data={
+                Sno:Sno
+            }
+            $.ajax({
+                url: '/deleteShop',
+                method: 'POST',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                success: function(response) {
+                    if (response.success) {
+                        searchShops();
+                    }
+                    else {
+                        alert('删除失败！');
+                    }
+                }
+            });
+        }
+
+        //搜索商家的函数
+        function searchShops() {
+            $.ajax({
+            url: '/searchShops',
+            method: 'POST',
+            dataType: 'json',
+            success: function(response) {
+            var shops = response.shops; // array of shops
+            var shopList = document.getElementById('shop-list');
+            shopList.innerHTML = '';
+
+            var table = document.createElement('table');
+
+            var headerRow = document.createElement('tr');
+            var snoHeader = document.createElement('th');
+            snoHeader.textContent = '商家编号';
+            headerRow.appendChild(snoHeader);
+            var sellerHeader = document.createElement('th');
+            sellerHeader.textContent = '商家名';
+            headerRow.appendChild(sellerHeader);
+            var markHeader = document.createElement('th');
+            markHeader.textContent = '商家评分';
+            headerRow.appendChild(markHeader);
+
+            var deleteHeader = document.createElement('th');
+            deleteHeader.textContent = '是否删除';
+            headerRow.appendChild(deleteHeader);
+
+            table.appendChild(headerRow);
+
+            for (var i = 0; i < shops.length; i++) {
+                var shop = shops[i];
+                var shopElement = document.createElement('tr');
+
+                var snoCell = document.createElement('td');
+                snoCell.textContent = shop.Sno;
+                shopElement.appendChild(snoCell);
+
+                var sellerCell = document.createElement('td');
+                sellerCell.textContent = shop.Sname;
+                shopElement.appendChild(sellerCell);
+
+                var markCell = document.createElement('td');
+                markCell.textContent = shop.Smark;
+                shopElement.appendChild(markCell);
+
+                
+                var deleteCell = document.createElement('td');
+                var deleteButton = document.createElement('button');
+                deleteButton.textContent = '删除';
+                deleteButton.setAttribute('data-gno', shop.Sno); // 存储商品编号到自定义属性
+                deleteButton.addEventListener('click', function() {
+                    // 获取存储的商品编号
+                    var gno = this.getAttribute('data-gno');
+                    // 调用删除商品的函数
+                    deleteShop(gno);
+                });
+                deleteCell.appendChild(deleteButton);
+                shopElement.appendChild(deleteCell);
+
+                table.appendChild(shopElement);
+            }
+
+
+            shopList.appendChild(table);
+            },
+            error: function(error) {
+            //输出语句，此处有误（到控制台？）
+            console.log('Error:', error);
+            }
+        });
+        }
+
+        //搜索商品的函数
+        function searchProducts() {
+            $.ajax({
+            url: '/searchProducts',
+            method: 'POST',
+            dataType: 'json',
+            success: function(response) {
+            var goods = response.goods; // 假设返回的JSON数据中有一个名为 "goods" 的数组
+      
+            var productList = document.getElementById('product-list');
+            productList.innerHTML = '';
+
+            var table = document.createElement('table');
+
+            var headerRow = document.createElement('tr');
+            var GnoHeader = document.createElement('th');
+            GnoHeader.textContent = '商品编号';
+            headerRow.appendChild(GnoHeader);
+            var nameHeader = document.createElement('th');
+            nameHeader.textContent = '商品名';
+            headerRow.appendChild(nameHeader);
+            var priceHeader = document.createElement('th');
+            priceHeader.textContent = '单价';
+            headerRow.appendChild(priceHeader);
+            var categoryHeader = document.createElement('th');
+            categoryHeader.textContent = '商品类别';
+            headerRow.appendChild(categoryHeader);
+            var GmarkHeader = document.createElement('th');
+            GmarkHeader.textContent = '商品评分';
+            headerRow.appendChild(GmarkHeader);
+            var quanHeader = document.createElement('th');
+            quanHeader.textContent = '商品库存';
+            headerRow.appendChild(quanHeader);
+            var timeHeader = document.createElement('th');
+            timeHeader.textContent = '送达时间';
+            headerRow.appendChild(timeHeader);
+            var sellerHeader = document.createElement('th');
+            sellerHeader.textContent = '商家名';
+            headerRow.appendChild(sellerHeader);
+            var markHeader = document.createElement('th');
+            markHeader.textContent = '商家评分';
+            headerRow.appendChild(markHeader);
+
+            var deleteHeader = document.createElement('th');
+            deleteHeader.textContent = '是否删除';
+            headerRow.appendChild(deleteHeader);
+
+            table.appendChild(headerRow);
+
+            for (var i = 0; i < goods.length; i++) {
+                var good = goods[i];
+
+                var productElement = document.createElement('tr');
+
+                var GnoCell = document.createElement('td');
+                GnoCell.textContent = good.Gno;
+                productElement.appendChild(GnoCell);
+
+                var nameCell = document.createElement('td');
+                nameCell.textContent = good.Gname;
+                productElement.appendChild(nameCell);
+
+                var priceCell = document.createElement('td');
+                priceCell.textContent = good.Gprice;
+                productElement.appendChild(priceCell);
+
+                var categoryCell = document.createElement('td');
+                categoryCell.textContent = good.Gtype;
+                productElement.appendChild(categoryCell);
+
+                var GmarkCell = document.createElement('td');
+                GmarkCell.textContent = good.Gmark;
+                productElement.appendChild(GmarkCell);
+
+                var quanCell = document.createElement('td');
+                quanCell.textContent = good.Gquan;
+                productElement.appendChild(quanCell);
+
+                var timeCell = document.createElement('td');
+                timeCell.textContent = good.Gtime;
+                productElement.appendChild(timeCell);
+
+                var sellerCell = document.createElement('td');
+                sellerCell.textContent = good.Sname;
+                productElement.appendChild(sellerCell);
+
+                var markCell = document.createElement('td');
+                markCell.textContent = good.Smark;
+                productElement.appendChild(markCell);
+
+                //删除按钮
+                var deleteCell = document.createElement('td');
+                var deleteButton = document.createElement('button');
+                deleteButton.textContent = '删除';
+                deleteButton.setAttribute('data-gno', good.Gno); // 存储商品编号到自定义属性
+                deleteButton.addEventListener('click', function() {
+                    // 获取存储的商品编号
+                    var gno = this.getAttribute('data-gno');
+                    // 调用删除商品的函数
+                    deleteProduct(gno);
+                });
+                deleteCell.appendChild(deleteButton);
+                productElement.appendChild(deleteCell);
+
+                table.appendChild(productElement);
+            }
+
+            productList.appendChild(table);
+            },
+            error: function(error) {
+            console.log('Error:', error);
+            }
+            });
+        }
+
+
+        //搜索用户的函数
+        function searchusers() {
+            $.ajax({
+            url: '/searchusers',
+            method: 'POST',
+            dataType: 'json',
+            success: function(response) {
+            var users = response.users; // 假设返回的JSON数据中有一个名为 "users" 的数组
+      
+            var userList = document.getElementById('user-list');
+            userList.innerHTML = '';
+
+            var table = document.createElement('table');
+
+            var headerRow = document.createElement('tr');
+            var snoHeader = document.createElement('th');
+            snoHeader.textContent = '用户名';
+            headerRow.appendChild(snoHeader);
+            var sellerHeader = document.createElement('th');
+            sellerHeader.textContent = '密码';
+            headerRow.appendChild(sellerHeader);
+            var markHeader = document.createElement('th');
+            markHeader.textContent = '电话号码';
+            headerRow.appendChild(markHeader);
+
+            var addHeader = document.createElement('th');
+            addHeader.textContent = '地址';
+            headerRow.appendChild(addHeader);
+            var monnyHeader = document.createElement('th');
+            monnyHeader.textContent = '余额';
+            headerRow.appendChild(monnyHeader);
+            table.appendChild(headerRow);
+
+
+            for (var i = 0; i < users.length; i++) {
+                var user = users[i];
+                var shopElement = document.createElement('tr');
+
+                var snoCell = document.createElement('td');
+                snoCell.textContent = user.Uname;
+                shopElement.appendChild(snoCell);
+
+                var sellerCell = document.createElement('td');
+                sellerCell.textContent = user.Upin;
+                shopElement.appendChild(sellerCell);
+
+                var markCell = document.createElement('td');
+                markCell.textContent = user.Utel;
+                shopElement.appendChild(markCell);
+
+                var addCell = document.createElement('td');
+                addCell.textContent = user.Uadd;
+                shopElement.appendChild(addCell);
+
+                var monnyCell = document.createElement('td');
+                monnyCell.textContent = user.Umonny;
+                shopElement.appendChild(monnyCell);
+
+            table.appendChild(shopElement);
+            }
+            userList.appendChild(table);
+            },
+            error: function(error) {
+            console.log('Error:', error);
+            }
+            });
+        }
+        
+        //搜索订单的函数
+        function searchbuyings() {
+            $.ajax({
+            url: '/searchbuyings',
+            method: 'POST',
+            dataType: 'json',
+            success: function(response) {
+            var buyings = response.buyings; 
+            var buyingsList = document.getElementById('buying-list');
+            buyingsList.innerHTML = '';
+
+            var table = document.createElement('table');
+
+            var headerRow = document.createElement('tr');
+            var snoHeader = document.createElement('th');
+            snoHeader.textContent = '用户名';
+            headerRow.appendChild(snoHeader);
+            var sellerHeader = document.createElement('th');
+            sellerHeader.textContent = '商品名';
+            headerRow.appendChild(sellerHeader);
+            var markHeader = document.createElement('th');
+            markHeader.textContent = '商品数量';
+            headerRow.appendChild(markHeader);
+            table.appendChild(headerRow);
+
+            for (var i = 0; i < buyings.length; i++) {
+                var buying = buyings[i];
+                var shopElement = document.createElement('tr');
+
+                var snoCell = document.createElement('td');
+                snoCell.textContent = buying.Uname;
+                shopElement.appendChild(snoCell);
+
+                var sellerCell = document.createElement('td');
+                sellerCell.textContent = buying.Gname;
+                shopElement.appendChild(sellerCell);
+
+                var markCell = document.createElement('td');
+                markCell.textContent = buying.Gquan;
+                shopElement.appendChild(markCell);
+
+                table.appendChild(shopElement);
+            }
+
+            buyingsList.appendChild(table);
+            },
+            error: function(error) {
+            //输出语句，此处有误（到控制台？）
+            console.log('Error:', error);
+            }
+        });
+        }
+
+        function getUsernameFromURL() {
+            var urlParams = new URLSearchParams(window.location.search);
+            var Uname = urlParams.get('Aname');
+            return Aname;
+        }
+    </script>
+
+</head>
+<body>
+    <h1>电商后台管理系统</h1>
+    <div class="button-container">
+        <button class="btn large" onclick="showForm('product-form')">商品查询</button>
+        <button class="btn large" onclick="showForm('merchant-form')">商家查询</button>
+        <button class="btn large" onclick="showForm('order-form')">订单查询</button>
+        <button class="btn large" onclick="showForm('user-form')">用户查询</button>
+    </div>
+
+    <!-- 用户查询表单 -->
+    <div id="user-form" class="form-container">
+        <h2>用户信息表</h2>
+        <!-- 根据相关的JSON数据显示用户信息 -->
+        <!-- 例如：用户名、用户地址、用户电话号码、用户密码等属性 -->
+    </div>
+
+    <!-- 订单查询表单 -->
+    <div id="order-form" class="form-container">
+        <h2>订单信息表</h2>
+        <!-- 根据相关的JSON数据显示订单信息 -->
+        <!-- 例如：用户名、商品名、商品个数等属性 -->
+    </div>
+
+    <!-- 商品查询表单 -->
+    <div id="product-form" class="form-container">
+        <h2>商品信息表</h2>
+    </div>
+
+    <!-- 商家查询表单 -->
+    <div id="merchant-form" class="form-container">
+        <h2>商家信息表</h2>
+        <!-- 根据相关的JSON数据显示商家信息 -->
+        <!-- 例如：商家名、商家评分等属性 -->
+    </div>
+
+    <!-- 商品信息表 -->
+    <div id="product-form-container" class="form-container">
+        <div id="product-list"></div>
+    </div>
+
+    <div id="merchant-form-container" class="form-container">
+        <div id="shop-list"></div>
+    </div>
+
+    <div id="order-form-container" class="form-container">
+        <div id="buying-list"></div>
+    </div>
+
+    <div id="user-form-container" class="form-container">
+        <div id="user-list"></div>
+    </div>
+
+</body>
+</html>

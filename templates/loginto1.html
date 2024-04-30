@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>网上购物</title>
+  <meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+  <meta http-equiv="description" content="this is my page">
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+  <style>
+    body {
+        background-image: url('/static/back2.jpg');
+    }
+
+    img.logo {
+        width: 200px;
+        height: 150px;
+    }
+
+    #welcomeText {
+        font-size: 1.5em;
+        color: #000;
+    }
+
+    table {
+        width: 100%;
+    }
+
+    table.menu {
+        background-color: #B6B684;
+        color: #ffffff;
+    }
+
+    table.search button {
+        color: #000;
+    }
+
+    h1, h2 {
+        color: #4d0d54;
+    }
+
+    a {
+        color: #0000EE;
+        text-decoration: none;
+    }
+
+    #productTable {
+        width: 100%;
+    }
+
+    #orderList {
+        list-style-type: none;
+    }
+  </style>
+ 
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    function logout() {
+      var username = getUsernameFromURL()
+      // 构造要发送的数据对象
+      var data = {
+        Uname: username
+      };
+      // 发送 POST 请求到后端
+      $.ajax({
+        url: '/delete', // 后端处理查询订单的路由
+        method: 'POST',
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        success: function(response) {
+          if (response.success) {
+            alert("您已成功注销账户！");
+            window.location.href = '/login.html';
+          } else {
+            alert('注销失败，请再次尝试！');
+          }
+        }
+      });
+    }
+
+    function showOrders() {
+      var username = getUsernameFromURL(); // 获取用户名
+
+      // 构造要发送的数据对象
+      var data = {
+        Uname: username
+      };
+
+      // 发送 POST 请求到后端
+      $.ajax({
+        url: '/person_search', // 后端处理查询订单的路由
+        method: 'POST',
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        success: function(response) {
+          if (response.success) {
+            var orders = response.orders; // 从响应中获取订单信息
+            displayOrders(orders); // 显示订单信息
+          } else {
+            alert('查询失败，请稍后再试！');
+          }
+        }
+      });
+    }
+    
+
+    function get_recommoned() {
+      var username = getUsernameFromURL(); // 获取用户名
+
+      // 构造要发送的数据对象
+      var data = {
+        Uname: username
+      };
+
+      // 发送 POST 请求到后端
+      $.ajax({
+        url: '/recommoned', // 后端处理查询订单的路由
+        method: 'POST',
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        success: function(response) {
+          if (response.success) {
+            var like = response.like; // 从响应中获取用户信息
+            if(like != NaN){
+              filename = [];
+              for (var i = 0; i < 3; i++) {
+                var gnoValue = like[i].Gno;
+                value = '/static/' + gnoValue.toString() + '.jpg'
+                filename.push(value);
+              };
+              goods = []
+              for (var i = 0; i < 3; i++) {
+                var good ={
+                  Gname:like[i].Gname,
+                  Gprice:like[i].Gprice
+                };
+                goods.push(good);
+              };
+            };
+            if(like == NaN){
+              filename = []
+              value = '/static/1.jpg';
+              filename.push(value);
+              value = '/static/2.jpg';
+              filename.push(value);
+              value = '/static/3.jpg';
+              filename.push(value);
+              goods = []
+              var good ={
+                Gname:'金属色印花双肩包',
+                Gprice:144
+              };
+              goods.push(good);
+              var good ={
+                Gname:'电脑包',
+                Gprice:108
+              };
+              goods.push(good);
+              var good ={
+                Gname:'春季新款背包',
+                Gprice:118.88
+              };
+              goods.push(good);
+            };
+          }else {
+            
+          }
+        }
+      });
+      var tdElements = document.getElementsByTagName('td');
+      for (var i = 0; i < 3; i++) {
+        var img = document.createElement('img');
+        img.src = filename[i];
+        img.width = 200;
+        img.height = 200;
+        tdElements[i].appendChild(img);
+      };
+      var tdElements = document.getElementsByTagName('td');
+      for (var i = 3; i < 6; i++) {
+        var p = document.createElement('p');
+        p.innerHTML = goods[i-3].Gname + '  ￥' + goods[i-3].Gprice;
+        tdElements[i].appendChild(p);
+      };
+
+      
+    }
+
+    function getUsernameFromURL() {
+      var urlParams = new URLSearchParams(window.location.search);
+      var Uname = urlParams.get('Uname');
+      return Uname;
+    }
+    // 调用获取用户名的函数
+    var username = getUsernameFromURL();
+    // 使用获取到的用户名进行后续操作，比如显示在页面上
+    console.log(username); // 示例：将用户名输出到控制台
+
+    function displayOrders(orders) {
+      var orderList = document.getElementById("orderList");
+      orderList.innerHTML = ""; // 清空之前的内容
+
+      for (var i = 0; i < orders.length; i++) {
+        var order = orders[i];
+        var listItem = document.createElement("li");
+        listItem.textContent = "商品名：" + order.Gname +  "，商品个数：" + order.Gquan;
+        orderList.appendChild(listItem);
+      }
+    }   
+
+    function showAccountBalance() {
+      var username = getUsernameFromURL(); // 获取用户名
+  
+      // 构造要发送的数据对象
+      var data = {
+        Uname: username
+      };
+
+      // 发送 POST 请求到后端
+      $.ajax({
+        url: '/get_yue', // 后端处理查询余额的路由
+        method: 'POST',
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        success: function(response) {
+          if (response.success) {
+            var yue = response.yue[0].Umonny; // 从响应中获取余额
+            alert("您的账户当前可用余额为 " + yue + " 元");
+          } else {
+            alert('查询失败，请稍后再试！');
+          }
+       }
+     });
+   }
+
+   function redirectToSearch() {
+    var username = getUsernameFromURL(); 
+    sessionStorage.setItem('username', username);
+    var encodedUsername = encodeURIComponent(username);
+    var url = "/search.html?username=" + encodedUsername;
+    window.location.href = url;
+  }
+
+    window.onload = function() {
+      var username = getUsernameFromURL();
+      var welcomeText = document.getElementById('welcomeText');
+      welcomeText.textContent = '欢迎你，用户：' + username;
+      getUsername();
+    };
+     
+  </script>
+</head>
+  
+<body>
+  <table>
+    <td align="center">
+      <img src="/static/logo2.png" class="logo">
+      <a href="#" onclick="fetchProductData()">首页推荐</a> |
+      <a href="#" onclick="showOrders()">订单查看</a> |
+      <a href="#" onclick="showAccountBalance()">账户余额</a>|
+      <a href="#" onclick="checkLog()">账户注销</a>
+      <img src="/static/logo1.jpg" class="logo">
+      <h3 id="welcomeText">欢迎你，用户：</h3>
+  </table>
+
+  <!-- 第二部分 目录部分 -->
+  <table class="menu">
+    <td align="center">
+      <font size="5" color="#ffffff">中科大网购平台，学生信赖的箱包服饰平台</font>
+    </td>
+  </table>
+
+  <!-- 第三部分 -->
+  <table class="search">
+    <tr>
+      <td align="right">
+        <button type="button" onclick="redirectToSearch()">输入关键字搜索</button>
+      </td>
+    </tr>
+  </table>
+
+  <!-- 第四部分 导引行 -->
+  <div align="left">您当前的位置：首页></div>
+
+  <!-- 第五部分 -->
+  <h1>首页推荐</h1>
+  <br/>
+
+  <!-- 第六部分 商品 -->
+  <table id="productTable"></table>
+
+  <div id="productTable"></div>
+
+  <!-- 订单列表 -->
+  <h2>订单列表</h2>
+  <ul id="orderList"></ul>
+
+</body>
+</html>
+

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+        .product-image {
+        max-width: 100px;
+        max-height: 100px;
+        width: auto;
+        height: auto;
+        margin-right: 10px;
+        }
+  </style>
+  <meta charset="utf-8">
+  <title>网上购物</title>
+  <meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+  <meta http-equiv="description" content="this is my page">
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+ 
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+function logout() {
+  var username = getUsernameFromURL();
+
+  // 弹出确认对话框
+  var confirmation = confirm("是否确认注销");
+
+  if (confirmation) {
+    // 构造要发送的数据对象
+    var data = {
+      Uname: username
+    };
+
+    // 发送 POST 请求到后端
+    $.ajax({
+      url: '/delete', // 后端处理注销的路由
+      method: 'POST',
+      data: JSON.stringify(data),
+      contentType: 'application/json',
+      success: function(response) {
+        if (response.success) {
+          alert("您已成功注销账户！");
+          window.location.href = '/login.html';
+        } else {
+          alert('注销失败，请再次尝试！');
+        }
+      }
+    });
+  } else {
+    location.reload();
+    return;
+  }
+}
+
+    function showOrders() {
+      var username = getUsernameFromURL(); // 获取用户名
+
+      // 构造要发送的数据对象
+      var data = {
+        Uname: username
+      };
+
+      // 发送 POST 请求到后端
+      $.ajax({
+        url: '/person_search', // 后端处理查询订单的路由
+        method: 'POST',
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        success: function(response) {
+          if (response.success) {
+            var orders = response.orders; // 从响应中获取订单信息
+            displayOrders(orders); // 显示订单信息
+          } else {
+            alert('查询失败，请稍后再试！');
+          }
+        }
+      });
+    }
+
+
+    function get_recommoned() {
+      var username = getUsernameFromURL(); // 获取用户名
+
+      // 构造要发送的数据对象
+      var data = {
+        Uname: username
+      };
+
+      // 发送 POST 请求到后端
+      $.ajax({
+        url: '/recommoned', // 后端处理查询推荐的路由
+        method: 'POST',
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        success: function(response) {
+          if (response.success) {
+            var goods = response.like; // 从响应中获取推荐信息
+            displayRecommoned(goods); // 显示推荐信息
+          } else {
+            alert('查询失败，请稍后再试！');
+          }
+        }
+      });
+      console.log("get_recommoned被触发");
+      }
+
+    
+    function getUsernameFromURL() {
+      var urlParams = new URLSearchParams(window.location.search);
+      var Uname = urlParams.get('Uname');
+      return Uname;
+    }
+    
+
+    function displayOrders(orders) {
+      var orderList = document.getElementById("orderList");
+      orderList.innerHTML = ""; // 清空之前的内容
+
+      for (var i = 0; i < orders.length; i++) {
+        var order = orders[i];
+        var listItem = document.createElement("li");
+        listItem.textContent = "商品名：" + order.Gname +  "，商品个数：" + order.Gquan;
+        orderList.appendChild(listItem);
+      }
+    }   
+    
+    function displayRecommoned(goods) {
+      var goodsTableBody = document.getElementById("goodsTableBody");
+      goodsTableBody.innerHTML = ""; // 清空之前的内容
+
+      // 创建表格行
+      for (var i = 0; i < goods.length; i++) {
+        var good = goods[i];
+        var row = document.createElement("tr");
+
+        // 创建表格单元格
+
+
+        var pictureCell = document.createElement('td');
+        var picture = document.createElement('img');
+        picture.src = './static/' + good.Gno + '.jpg';
+        picture.className = 'product-image';
+        pictureCell.appendChild(picture);
+
+        var gnoCell = document.createElement("td");
+        gnoCell.textContent = good.Gno;
+        var nameCell = document.createElement("td");
+        nameCell.textContent = good.Gname;
+        var priceCell = document.createElement("td");
+        priceCell.textContent = good.Gprice;
+
+        // 将单元格添加到行中
+        row.appendChild(pictureCell);
+        row.appendChild(gnoCell);
+        row.appendChild(nameCell);
+        row.appendChild(priceCell);
+
+        // 将行添加到表格主体中
+        goodsTableBody.appendChild(row);
+      }
+    }
+
+
+
+    function showAccountBalance() {
+      var username = getUsernameFromURL(); // 获取用户名
+  
+      // 构造要发送的数据对象
+      var data = {
+        Uname: username
+      };
+
+      // 发送 POST 请求到后端
+      $.ajax({
+        url: '/get_yue', // 后端处理查询余额的路由
+        method: 'POST',
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        success: function(response) {
+          if (response.success) {
+            var yue = response.yue[0].Umonny; // 从响应中获取余额
+            alert("您的账户当前可用余额为 " + yue + " 元");
+          } else {
+            alert('查询失败，请稍后再试！');
+          }
+       }
+     });
+   }
+
+   function redirectToSearch() {
+    var username = getUsernameFromURL(); 
+    sessionStorage.setItem('username', username);
+    var encodedUsername = encodeURIComponent(username);
+    var url = "/search.html?username=" + encodedUsername;
+    window.location.href = url;
+  }
+
+    window.onload = function() {
+      var username = getUsernameFromURL();
+      var welcomeText = document.getElementById('welcomeText');
+      welcomeText.textContent = '欢迎你，用户：' + username;
+    };
+     
+  </script>
+</head>
+  
+<body style="background-image: url('/static/back2.jpg');">
+  <table width="100%">
+    <td align="center">
+      <img src="/static/logo2.png" width="200" height="150" align="center">
+      <a href="#" onclick="showOrders()">订单查看</a> |
+      <a href="#" onclick="showAccountBalance()">账户余额</a>|
+
+      <a href="#" onclick="get_recommoned()">首页推荐</a>|
+      <a href="#" onclick="logout()">账户注销</a>
+      <img src="/static/logo1.jpg" width="200" height="150"  align="center">
+      <h3 id="welcomeText">欢迎你，用户：</h3>
+  </table>
+
+  <!-- 第二部分 目录部分 -->
+  <table width="100%" bgcolor="#B6B684" align="center">
+    <td align="center">
+      <font size="5" color="#ffffff">中科大网购平台，学生信赖的箱包服饰平台</font>
+    </td>
+  </table>
+
+  <!-- 第三部分 -->
+  <table width="100%" >
+    <tr>
+      <td align="right">
+        <button type="button" onclick="redirectToSearch()">输入关键字搜索</button>
+      </td>
+    </tr>
+  </table>
+
+  <!-- 第四部分 导引行 -->
+  <div align="left">您当前的位置：首页></div>
+
+  <!-- 第五部分 -->
+  <h1 style="color: #4d0d54">首页推荐</h1>
+  <br/>
+
+
+
+  <!-- 订单列表 -->
+  <h2>订单列表</h2>
+  <ul id="orderList"></ul>
+
+
+
+
+<h2>推荐</h2>
+<table id="goodsTable">
+  <thead>
+    <tr>
+      <th>商品图片</th>
+      <th>商品号</th>
+      <th>商品名</th>
+      <th>商品价格</th>
+    </tr>
+  </thead>
+  <tbody id="goodsTableBody"></tbody>
+</table>
+
+
+
+
+</body>
+</html>
+

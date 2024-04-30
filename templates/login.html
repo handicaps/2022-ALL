@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>登录</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-image: url("/static/back1.jpg");
+            background-size: cover;
+            font-family: "微软雅黑", sans-serif;
+        }
+
+        .login {
+            font-size: large;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+        }
+
+        .login h1 {
+            color: #555555;
+            text-shadow: 0px 10px 10px #E6E6FA;
+            letter-spacing: 2px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        input {
+            padding: 10px;
+            width: 100%;
+            color: white;
+            margin-bottom: 10px;
+            background-color: #DCDCDC;
+            border: 1px solid black;
+            border-radius: 5px;
+            letter-spacing: 2px;
+        }
+
+        form button {
+            font-size: medium;
+            width: 49%;
+            padding: 10px;
+            margin-bottom: 9px;
+            background-color: #F5DEB3;
+            border: 1px solid black;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .admin-login-button {
+            font-size: medium;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 9px;
+            background-color: #F5DEB3;
+            border: 1px solid black;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#login-form').submit(function(event) {
+                event.preventDefault(); // 阻止表单默认提交行为
+
+                // 获取输入的用户名和密码
+                var Uname = $('#Uname').val();
+                var Upin = $('#Upin').val();
+
+                // 构造要发送的数据对象
+                var data = {
+                    Uname: Uname,
+                    Upin: Upin
+                };
+
+                // 发送 POST 请求到后端
+                $.ajax({
+                    url: '/login',
+                    method: 'POST',
+                    data: JSON.stringify(data),
+                    contentType: 'application/json',
+                    success: function(response) {
+                        if (response.success) {
+                            alert('登录成功！');
+                            sessionStorage.setItem('username', Uname);
+                            window.location.href = '/loginto.html?Uname=' + Uname;
+                        } else {
+                            alert('用户名或密码错误！');
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="login">
+        <h1>适合中科大学生的网购平台</h1>
+        <form id="login-form">
+            <input type="text" id="Uname" name="Uname" placeholder="用户名" required="required">
+            <input type="password" id="Upin" name="Upin" placeholder="密码" required="required">
+            <div class="flex">
+                <button type="submit">用户登录</button>
+                <button type="button" onclick="location.href='try_register.html'">注册</button>
+                <button type="button" class="admin-login-button" onclick="location.href='try_admin.html'">管理员登录</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

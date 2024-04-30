@@ -1,0 +1,354 @@
+<html>
+<head>
+    <title>商品查询</title>
+    <style>
+        .product-image {
+        max-width: 100px;
+        max-height: 100px;
+        width: auto;
+        height: auto;
+        margin-right: 10px;
+        }
+        .counter {
+            display: flex;
+            align-items: center;
+        }
+        .total {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .buy-button {
+            margin-top: 10px;
+        }
+        .product-table {
+            width: fit-content;
+            margin: 0 auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        /* Border styles */
+        #product-list thead,
+        #product-list tr {
+            border-top: 1px solid rgb(211, 202, 221);
+        }
+        #product-list {
+            border-bottom: 1px solid rgb(211, 202, 221);
+        }
+        /* Padding and font style */
+        #product-list td,
+        #product-list th {
+            padding: 5px 10px;
+            font-size: 12px;
+            font-family: Verdana;
+            color: rgb(95, 74, 121);
+        }
+        /* Alternating background colors */
+        #product-list tr:nth-child(even) {
+            background: rgb(223, 216, 232);
+        }
+        #product-list tr:nth-child(odd) {
+            background: #FFF;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function searchProducts() {
+            var keyword = document.getElementById('search-input').value;
+            $.ajax({
+                url: '/search',
+                method: 'POST',
+                data: JSON.stringify({ Gname: keyword }),
+                contentType: 'application/json',
+                success: function(response) {
+                    if (response.success) {
+                        var products = response.products;
+                        displayProducts(products);
+                    } else {
+                        alert('搜索失败，请稍后再试！');
+                    }
+                }
+            });
+        }
+
+        function displayProducts(products) {
+            var productList = document.getElementById('product-list');
+            productList.innerHTML = '';
+
+            var table = document.createElement('table');
+
+            var headerRow = document.createElement('tr');
+            var checkboxHeader = document.createElement('th');
+            checkboxHeader.textContent = '选择';
+            headerRow.appendChild(checkboxHeader);
+            var pictureHeader = document.createElement('th');
+            pictureHeader.textContent = '商品图片';
+            headerRow.appendChild(pictureHeader);
+            var indexHeader = document.createElement('th');
+            indexHeader.textContent = '商品编号';
+            headerRow.appendChild(indexHeader);
+            var nameHeader = document.createElement('th');
+            nameHeader.textContent = '商品名';
+            headerRow.appendChild(nameHeader);
+            var priceHeader = document.createElement('th');
+            priceHeader.textContent = '单价';
+            headerRow.appendChild(priceHeader);
+            var categoryHeader = document.createElement('th');
+            categoryHeader.textContent = '商品类别';
+            headerRow.appendChild(categoryHeader);
+            var GmarkHeader = document.createElement('th');
+            GmarkHeader.textContent = '商品评分';
+            headerRow.appendChild(GmarkHeader);
+            var quanHeader = document.createElement('th');
+            quanHeader.textContent = '商品库存';
+            headerRow.appendChild(quanHeader);
+            var timeHeader = document.createElement('th');
+            timeHeader.textContent = '送达时间';
+            headerRow.appendChild(timeHeader);
+            var sellerHeader = document.createElement('th');
+            sellerHeader.textContent = '商家名';
+            headerRow.appendChild(sellerHeader);
+            var markHeader = document.createElement('th');
+            markHeader.textContent = '商家评分';
+            headerRow.appendChild(markHeader);
+            var qHeader = document.createElement('th');
+            qHeader.textContent = '选择数量';
+            headerRow.appendChild(qHeader);
+            table.appendChild(headerRow);
+
+            var totalQuantity = 0;
+            var totalPrice = 0;
+
+            for (var i = 0; i < products.length; i++) {
+                var product = products[i];
+
+                var productElement = document.createElement('tr');
+                productElement.className = 'product';
+
+                var checkboxCell = document.createElement('td');
+                var checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'product-checkbox';
+                checkbox.onchange = function() {
+                    calculateTotal();
+                };
+                checkboxCell.appendChild(checkbox);
+                productElement.appendChild(checkboxCell);
+
+                var pictureCell = document.createElement('td');
+                var picture = document.createElement('img');
+                picture.src = './static/' + product.Gno + '.jpg';
+                picture.className = 'product-image';
+                pictureCell.appendChild(picture);
+                productElement.appendChild(pictureCell);
+
+                var indexCell = document.createElement('td');
+                indexCell.textContent = product.Gno;
+                productElement.appendChild(indexCell);
+
+                var nameCell = document.createElement('td');
+                nameCell.textContent = product.Gname;
+                productElement.appendChild(nameCell);
+
+                var priceCell = document.createElement('td');
+                priceCell.textContent = '$' + product.Gprice.toFixed(2);
+                priceCell.className = 'product-price';
+                productElement.appendChild(priceCell);
+
+                var categoryCell = document.createElement('td');
+                categoryCell.textContent = product.Gtype;
+                productElement.appendChild(categoryCell);
+
+                var GmarkCell = document.createElement('td');
+                GmarkCell.textContent = product.Gmark;
+                productElement.appendChild(GmarkCell);
+
+                var quanCell = document.createElement('td');
+                quanCell.textContent = product.Gquan;
+                productElement.appendChild(quanCell);
+
+                var timeCell = document.createElement('td');
+                timeCell.textContent = product.Gtime;
+                productElement.appendChild(timeCell);
+
+                var sellerCell = document.createElement('td');
+                sellerCell.textContent = product.Sname;
+                productElement.appendChild(sellerCell);
+
+                var markCell = document.createElement('td');
+                markCell.textContent = product.Smark;
+                productElement.appendChild(markCell);
+
+                var counterCell = document.createElement('td');
+                counterCell.className = 'counter';
+
+                var decreaseButton = document.createElement('button');
+                decreaseButton.textContent = '-';
+                decreaseButton.onclick = function() {
+                    decreaseQuantity(this.nextElementSibling);
+                    calculateTotal();
+                };
+                counterCell.appendChild(decreaseButton);
+
+                var quantityInput = document.createElement('input');
+                quantityInput.type = 'number';
+                quantityInput.value = 1;
+                quantityInput.min = 1;
+                quantityInput.max = 10;
+                quantityInput.oninput = function() {
+                    calculateTotal();
+                };
+                counterCell.appendChild(quantityInput);
+
+                var increaseButton = document.createElement('button');
+                increaseButton.textContent = '+';
+                increaseButton.onclick = function() {
+                    increaseQuantity(this.previousElementSibling);
+                    calculateTotal();
+                };
+                counterCell.appendChild(increaseButton);
+
+                var productDataCell = document.createElement('td');
+                productDataCell.appendChild(counterCell);
+
+                productElement.appendChild(productDataCell);
+                table.appendChild(productElement);
+            }
+
+            productList.appendChild(table);
+
+            calculateTotal();
+        }
+
+        function decreaseQuantity(input) {
+            var quantity = parseInt(input.value);
+            if (quantity > 1) {
+                input.value = quantity - 1;
+            } else if (quantity == 1) {
+                alert('商品数量不能小于1');
+            }
+        }
+
+        function increaseQuantity(input) {
+            var quantity = parseInt(input.value);
+            if (quantity < 10) {
+                input.value = quantity + 1;
+            } else if (quantity == 10) {
+                alert('超出单次购买上限');
+            }
+        }
+
+        function calculateTotal() {
+            var products = document.querySelectorAll('tr.product');
+            var totalQuantity = 0;
+            var totalPrice = 0;
+
+            for (var i = 0; i < products.length; i++) {
+                var product = products[i];
+                var checkbox = product.querySelector('.product-checkbox');
+                var quantityInput = product.querySelector('input[type="number"]');
+                var price = parseFloat(product.querySelector('.product-price').textContent.substring(1));
+
+                if (checkbox.checked) {
+                    var quantity = parseInt(quantityInput.value);
+                    totalQuantity += quantity;
+                    totalPrice += price * quantity;
+                }
+            }
+
+            document.getElementById('total-quantity').textContent = '商品总数量：' + totalQuantity;
+            document.getElementById('total-price').textContent = '总价：$' + totalPrice.toFixed(2);
+        }
+
+        function setjson() {
+            var products = document.querySelectorAll('tr.product');
+
+        }
+
+        function buyProducts() {
+            var username = getUsernameFromURL('username');
+            var totalPrice = parseFloat(document.getElementById('total-price').textContent.substring(4));
+            var totalQuantity = parseInt(document.getElementById('total-quantity').textContent.substring(6));
+            var confirmation = confirm('已购买' + totalQuantity + '件商品，总价为：$' + totalPrice.toFixed(2));
+            if (confirmation) {
+                location.reload(); // 刷新页面
+            }
+            var products = document.querySelectorAll('tr.product');
+            var orderData = []; // 存储订单数据
+
+            for (var i = 0; i < products.length; i++) {
+                var product = products[i];
+                var checkbox = product.querySelector('.product-checkbox');
+                var quantityInput = product.querySelector('input[type="number"]');
+                var productName = product.querySelector('td:nth-child(4)').textContent;
+                if (checkbox.checked) {
+                    var quantity = parseInt(quantityInput.value);
+                    var orderItem = {
+                        name: productName,
+                        quantity: quantity
+                    };
+                    orderData.push(orderItem);
+                }
+            }
+            var user = {
+                username: username,
+                price: totalPrice
+            }
+            orderData.push(user)
+            if (confirmation) {
+                // 将订单数据发送给后端
+                $.ajax({
+                    url: '/buy',
+                    method: 'POST',
+                    data: JSON.stringify(orderData),
+                    contentType: 'application/json',
+                    success: function(response) {
+                        if (response.success) {
+                            location.reload(); // 刷新页面
+                        } else {
+                            alert('提交订单失败，请稍后再试！');
+                        }
+                    }
+                });
+            }
+        }
+
+
+        function getUsernameFromURL() {
+            var urlParams = new URLSearchParams(window.location.search);
+            var username = urlParams.get('username');
+            return username;
+        }
+
+    </script>
+
+</head>
+<body>
+    <h1>商品搜索</h1>
+
+    <div>
+        <label for="search-input">关键字：</label>
+        <input type="text" id="search-input">
+        <button onclick="searchProducts()">搜索</button>
+    </div>
+
+    <div id="product-list" class="product-table">
+        <!-- Table for displaying product attributes -->
+    </div>
+
+    <div class="total">
+        <p id="total-quantity">商品总数量：0</p>
+        <p id="total-price">总价：$0.00</p>
+    </div>
+    <br>
+    <button class="buy-button" onclick="buyProducts()" style="float: right">购买</button>
+    <br><br>
+
+</body>
+</html>
